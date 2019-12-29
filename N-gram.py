@@ -80,12 +80,9 @@ def gen_bot_list(ngram_model, seed, num_tokens = 0):
         elif len(output_string) >= num_tokens:
                 output_string = output_string[-(num_tokens):]
         else:
-                condition = (len(output_string) >= num_tokens or (not (tuple(curr) in ngram_model.keys())))
-                while not condition:
-                        output_string.append(utilities.gen_next_token(tuple(curr), ngram_model))
-                        current_ngram = output_string[-(len(curr)):]
-                        condition = (len(output_string) >= num_tokens or (not (tuple(curr) in ngram_model.keys())))
-
+                while (len(output_string) <= num_tokens):
+                        token = utilities.gen_next_token(tuple(output_string[-len(curr):]), ngram_model)
+                        output_string.append(token)
         return output_string
 
 def gen_bot_text(token_list):
@@ -97,7 +94,7 @@ def gen_bot_text(token_list):
                 cap[i] = cap[i].lower()
 
         token_list[0] = token_list[0].capitalize()
-        output_string += token_list[0]
+        output_string += token_list[0]+" "
 
         for i in range(1, len(token_list)):
                 if(token_list[i-1] in end_punc or (token_list[i]) in cap):
@@ -107,3 +104,9 @@ def gen_bot_text(token_list):
                         output_string = output_string + " "
 
         return output_string
+
+if __name__ == "__main__":
+        word_list = parse_story("308.txt")
+        ngram = build_ngram_model(word_list, 20)
+        token_list = gen_bot_list(ngram, utilities.gen_seed(ngram), 100)
+        print(gen_bot_text(token_list))
